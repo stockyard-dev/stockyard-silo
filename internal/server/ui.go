@@ -1,7 +1,13 @@
 package server
+
 import "net/http"
-func(s *Server)dashboard(w http.ResponseWriter,r *http.Request){w.Header().Set("Content-Type","text/html");w.Write([]byte(dashHTML))}
-const dashHTML=`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Silo</title>
+
+func (s *Server) dashboard(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	w.Write([]byte(dashHTML))
+}
+
+const dashHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Silo</title>
 <style>:root{--bg:#1a1410;--bg2:#241e18;--bg3:#2e261e;--rust:#e8753a;--leather:#a0845c;--cream:#f0e6d3;--cd:#bfb5a3;--cm:#7a7060;--gold:#d4a843;--green:#4a9e5c;--mono:'JetBrains Mono',monospace}
 *{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--cream);font-family:var(--mono);line-height:1.5}
 .hdr{padding:1rem 1.5rem;border-bottom:1px solid var(--bg3);display:flex;justify-content:space-between;align-items:center}.hdr h1{font-size:.9rem;letter-spacing:2px}
@@ -43,4 +49,22 @@ async function del(id){if(confirm('Delete?')){await fetch(A+'/files/'+id,{method
 function fmtSize(b){if(b>=1073741824)return(b/1073741824).toFixed(1)+'GB';if(b>=1048576)return(b/1048576).toFixed(1)+'MB';if(b>=1024)return(b/1024).toFixed(1)+'KB';return b+'B';}
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 load();
-</script></body></html>`
+</script>
+<script>
+(function(){
+  fetch('/api/config').then(function(r){return r.json()}).then(function(cfg){
+    if(!cfg||typeof cfg!=='object')return;
+    if(cfg.dashboard_title){
+      document.title=cfg.dashboard_title;
+      var h1=document.querySelector('h1');
+      if(h1){
+        var inner=h1.innerHTML;
+        var firstSpan=inner.match(/<span[^>]*>[^<]*<\/span>/);
+        if(firstSpan){h1.innerHTML=firstSpan[0]+' '+cfg.dashboard_title}
+        else{h1.textContent=cfg.dashboard_title}
+      }
+    }
+  }).catch(function(){});
+})();
+</script>
+</body></html>`
